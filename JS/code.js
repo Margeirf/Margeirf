@@ -12,8 +12,11 @@ var leftPressed = false;
 var score = 0;
 var lives = 3;
 var level = 0;
-var gravity = 2;
-var ballDone = true;
+var balls = [{
+        x: Math.floor(Math.random()*800),
+        y: Math.floor(Math.random()*200)*-1,
+        ballDone: false
+    }];
 
 var x = 0;
 var y = 0;
@@ -45,12 +48,14 @@ function mouseMoveHandler(e) {
     }
 }
 
-function drawBall(posX, posY) {
-    ctx.beginPath();
-    ctx.arc(posX, posY, ballRadius, 0, Math.PI*2);
-    ctx.fillStyle = "#0095DD";
-    ctx.fill();
-    ctx.closePath();
+function drawBall() {
+    for(let i = 0;i<balls.length;i++){
+        ctx.beginPath();
+        ctx.arc(balls[i].x, balls[i].y, ballRadius, 0, Math.PI*2);
+        ctx.fillStyle = "#0095DD";
+        ctx.fill();
+        ctx.closePath();
+    }
 }
 function drawPaddle() {
     ctx.beginPath();
@@ -77,43 +82,63 @@ function movePaddle(){
         player.paddleX -= 7;
     }
 }
-function balls(){
-    if(ballDone){
-        x = Math.floor(Math.random()*800);
-        ballDone = false;
+function ballsCheck(){
+    for(let i = 0;i<balls.length;i++){
+        if(balls[i].ballDone){
+            balls[i].x = Math.floor(Math.random()*800);
+            balls[i].y = Math.floor(Math.random()*1000)*-1;
+            balls[i].ballDone = false;
+        }
     }
-
-    
-    drawBall(x, y);
+    drawBall();
+}
+function checkBalls(){
+    if(score % 5 == 0){
+        addBall();
+    }
 }
 function groundCheck(){
-    if(y >= canvas.height){
-       if(x >= player.paddleX && x <= player.paddleX + player.paddleWidth){
-            player.health -= 1;
-            resetBall();
-        }else if(x < player.paddleX || x > player.paddleX + player.paddleWidth){
-            player.score += 1;
-            resetBall();
+    for(let i=0;i<balls.length;i++){
+        if(balls[i].y >= canvas.height){
+           if(balls[i].x >= player.paddleX && balls[i].x <= player.paddleX + player.paddleWidth){
+                player.health -= 1;
+                resetBall(balls[i]);
+            }else if(balls[i].x < player.paddleX || balls[i].x > player.paddleX + player.paddleWidth){
+                player.score += 1;
+                checkBalls();
+                resetBall(balls[i]);
+            }
         }
     }
 }
-
-function resetBall() {
-    x = 0;
-    y = 0;
-    ballDone = true;
+function gravity(){
+    for(let i=0;i<balls.length;i++){
+        balls[i].y += 5;
+    }
+}
+function addBall(){
+    balls.push({
+        x: Math.floor(Math.random()*800),
+        y: Math.floor(Math.random()*200)*-1,
+        ballDone: false
+    })
+}
+function resetBall(ball) {
+        ball.x = Math.floor(Math.random()*800);
+        ball.y = Math.floor(Math.random()*200)*-1;
+        ball.ballDone = true;
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
     drawPaddle();
     drawScore();
     drawLives();
     movePaddle();
-    balls();
+    ballsCheck();
     groundCheck();
-    
-    y += gravity;
+    gravity();
     requestAnimationFrame(draw);
 }
 
