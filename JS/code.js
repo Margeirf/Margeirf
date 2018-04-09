@@ -3,14 +3,12 @@ var ctx = canvas.getContext("2d");
 var ballRadius = 10;
 var player = {};
 player.paddleHeight = 10;
-player.paddleWidth = 75;
+player.paddleWidth = 45;
 player.paddleX = (canvas.width-player.paddleWidth)/2;
 player.score = 0;
 player.health = 5;
 var rightPressed = false;
 var leftPressed = false;
-var score = 0;
-var lives = 3;
 var level = 0;
 var balls = [{
         x: Math.floor(Math.random()*800),
@@ -93,7 +91,7 @@ function ballsCheck(){
     drawBall();
 }
 function checkBalls(){
-    if(score % 5 == 0){
+    if(player.score % 2 == 0){
         addBall();
     }
 }
@@ -117,16 +115,24 @@ function gravity(){
     }
 }
 function addBall(){
-    balls.push({
-        x: Math.floor(Math.random()*800),
-        y: Math.floor(Math.random()*200)*-1,
-        ballDone: false
-    })
+    if (balls.length < 65){
+        balls.push({
+            x: Math.floor(Math.random()*800),
+            y: Math.floor(Math.random()*200)*-1,
+            ballDone: false
+        })
+    }
 }
 function resetBall(ball) {
         ball.x = Math.floor(Math.random()*800);
         ball.y = Math.floor(Math.random()*200)*-1;
         ball.ballDone = true;
+}
+function endGame() {
+    if(player.health <= 0){
+        document.location.reload();
+        alert("Player is out of lives with " + player.score + " points!");
+    }
 }
 
 function draw() {
@@ -140,6 +146,7 @@ function draw() {
     groundCheck();
     gravity();
     requestAnimationFrame(draw);
+    endGame();
 }
 
 draw();
